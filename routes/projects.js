@@ -1,28 +1,44 @@
 const router = require('express').Router();
 let project = require('../models/project');
+var userController  = require('../controller/user-controller');
+var passport	    = require('passport');
 
 
-router.route('/').get((req, res) => {
-    project.find()
+router.get('/', passport.authenticate('jwt', { session: false }), (req, res)=>{
+    project.find({owner: req.user._id})
         .then(projects => res.json(projects))
         .catch(err => res.status(400).json('Error: ' + err));
 });
 
-router.route('/addproject').post((req, res) => {
+router.post('/addproject', passport.authenticate('jwt', { session: false }), (req, res)=>{
     project.create({
         title: req.body.title,
         kind: req.body.kind,
         size: req.body.size,
         description: req.body.description,
         status: 'Under studies',
-        owner: req.user
+        owner: req.user._id
     })
         .then(p => res.json(p))
         .catch(err => res.status(400).json({ "Error": err }))
 });
 
-router.route('/removeproject/:id').get((req, res) => {
-    project.findByIdAndRemove(req.params.id)
+router.route('/getProjectById').post((req, res) => {
+    console.log(req.body);
+    project.findById(req.body._id)
+        .then(tasks => res.json(tasks))
+        .catch(err => res.status(400).json('Error: ' + err));
+});
+
+router.route('/getprojectbyprojectid').post((req, res) => {
+    console.log(req.body);
+    project.findById(req.body._id)
+        .then(tasks => res.json(tasks))
+        .catch(err => res.status(400).json('Error: ' + err));
+});
+
+router.route('/removeproject').post((req, res) => {
+    project.findByIdAndRemove(req.body._id)
         .then(p => res.json(p))
         .catch(err => res.status(400).json({ "Error": err }))
 });

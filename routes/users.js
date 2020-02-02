@@ -3,15 +3,20 @@ var express         = require('express'),
 var userController  = require('../controller/user-controller');
 var passport	    = require('passport');
  
-routes.get('/', (req, res) => {
-    return res.send('Hello, this is the API!');
-});
+routes.get('/', userController.users);
+routes.get('/developers',passport.authenticate('jwt', { session: false }), userController.developers);
  
 routes.post('/register', userController.registerUser);
 routes.post('/login', userController.loginUser);
+routes.post('/newdeal', userController.newDeal);
  
 routes.get('/special', passport.authenticate('jwt', { session: false }), (req, res) => {
-    return res.json({ msg: `Hey ${req.user.email}! I open at the close.` });
+    return res.json(req.user);
+});
+
+routes.get('/currentuser', userController.currentuser);
+routes.get('/currentUserProjects',passport.authenticate('jwt', { session: false }), (req, res) => {
+    return userController.currentUserProjects;
 });
  
 module.exports = routes;
